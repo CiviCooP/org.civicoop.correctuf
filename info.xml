@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<extension key="org.civicoop.correctuf" type="module">
+  <file>correctuf</file>
+  <name>Correct UF</name>
+  <description>This corrects the User/Contact link in a drupal installation. It links the correct user with a contact based on the e-mail address</description>
+  <license>AGPL-3.0</license>
+  <maintainer>
+    <author>Jaap Jansma</author>
+    <email>helpdesk@civicoop.org</email>
+  </maintainer>
+  <releaseDate>2014-10-25</releaseDate>
+  <version>1.0</version>
+  <develStage>alpha</develStage>
+  <compatibility>
+    <ver>4.2</ver>
+  </compatibility>
+  <comments>This is a new, undeveloped module</comments>
+  <civix>
+    <namespace>CRM/Correctuf</namespace>
+  </civix>
+</extension>

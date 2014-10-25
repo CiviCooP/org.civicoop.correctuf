@@ -28,7 +28,7 @@ function civicrm_api3_contact_correctuf($params) {
   $toBeInserted = array();
   
   //first find current records in UF table
-  $uf_dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_uf_match` AND `domain_id` = 1");
+  $uf_dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_uf_match` WHERE `domain_id` = 1");
   while ($uf_dao->fetch()) {
     $email_dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_email` WHERE `contact_id` = %1 ORDER BY `is_primary` DESC", array(1 => array($uf_dao->contact_id, 'Integer')));
     $uid = false;
@@ -56,15 +56,19 @@ function civicrm_api3_contact_correctuf($params) {
   //now check all drupal users who are not in the UF table
   $users = entity_load('user');
   foreach($users as $uid => $user) {
+    if (empty($user->mail)) {
+      continue;
+    }
+    
     //check wether a link exist and wether that link is valid
     $exist = false;
     $uf_dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_uf_match` WHERE `domain_id` = 1 AND `uf_id` = %1", array(1 => array($uid, 'Integer')));
     if ($uf_dao->fetch()) {
       $exist = $uf_dao->id;
     }
-    
+
     //check wether we can find a contact with the same e-mail address
-    $email_dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_email` WHERE `email` = %1", array(1=>array($user->mail)));
+    $email_dao = CRM_Core_DAO::executeQuery("SELECT * FROM `civicrm_email` WHERE `email` = %1", array(1=>array($user->mail, 'String')));
     if ($email_dao->fetch()) {
       //we did find a matching contact
       if ($exist) {
@@ -81,7 +85,9 @@ function civicrm_api3_contact_correctuf($params) {
   }
   
     //remove 
-  CRM_Core_DAO::executeQuery("DELETE FROM `civicrm_uf_match` WHERE `id` IN (".implode(",", $toBeRemoved));
+  if (count($toBeRemoved)) {
+    CRM_Core_DAO::executeQuery("DELETE FROM `civicrm_uf_match` WHERE `id` IN (".implode(",", $toBeRemoved).")");
+  }
   //update
   foreach($toBeUpdated as $update) {
     $sql = "UPDATE `civicrm_uf_match` SET `uf_id` = %1, `uf_name` = %2, `contact_id` = %3 WHERE `id` = %4";
